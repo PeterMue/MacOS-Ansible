@@ -19,3 +19,5 @@
       tags: [homebrew]
     - name: dotfiles
       tags: [dotfiles]
+    - name: java
+      tags: [java]

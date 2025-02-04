@@ -15,3 +15,10 @@ homebrew_casks:
   - visual-studio-code
 
 dotfiles_git_repo: 'git@github.com:PeterMue/dotfiles.git'
+
+java_versions:
+  - zulu@21
+  - zulu@17
+  - zulu@8
+
+# java_cacerts_uri: https://df4ebe32-f23f-4b0a-9e6a-ca68e87f9d63.mock.pstmn.io/cacerts

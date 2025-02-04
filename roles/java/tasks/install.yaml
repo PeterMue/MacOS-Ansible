@@ -1,0 +1,31 @@
+---
+- name: Ensure jenv is installed
+  community.general.homebrew:
+    name: "jenv"
+    state: present
+    update_homebrew: true
+
+- name: Install java versions
+  community.general.homebrew_cask:
+    name: "{{ item }}"
+    state: present
+    sudo_password: "{{ ansible_become_pass }}"
+  loop: "{{ java_versions }}"
+
+- name: Find all installed java versions
+  find:
+    paths: /Library/Java/JavaVirtualMachines
+    recurse: yes
+    file_type: directory
+    depth: 1
+  register: found_jvms
+
+- name: Add each Java version to jenv
+  shell: jenv add "{{ jvm.path }}/Contents/Home"
+  loop: "{{ found_jvms.files }}"
+  loop_control:
+    loop_var: jvm
+  ignore_errors: yes
+  register: jenv_output
+  changed_when: "'added' in jenv_output.stdout"
+

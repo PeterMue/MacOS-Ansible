@@ -1,0 +1,49 @@
+---
+- name: Find cacerts {{ java_virtual_machine.path | basename }}
+  ansible.builtin.find:
+    paths:
+      - "{{ java_virtual_machine.path }}/Contents/Home/lib/security"
+      - "{{ java_virtual_machine.path }}/Contents/Home/jre/lib/security"
+    patterns: "cacerts"
+  register: found_cacerts
+
+- name: Calculate cacerts checksum with sha256 for {{ java_virtual_machine.path | basename }}
+  ansible.builtin.stat:
+    path: "{{ found_cacerts.files[0].path }}"
+    checksum_algorithm: sha256
+  register: current_cacerts
+  when: found_cacerts.matched > 0
+
+- name: Backup the original cacerts file for {{ java_virtual_machine.path | basename }}
+  ansible.builtin.copy:
+    src: "{{ found_cacerts.files[0].path }}"
+    dest: "{{ found_cacerts.files[0].path }}.bak"
+  when: found_cacerts.matched > 0 and current_cacerts.stat.checksum != cacerts_checksum | trim
+  become: yes
+
+- name: Check if download is required and download updated cacerts
+  block:
+    - name: Download updated cacerts
+      ansible.builtin.get_url:
+        url: "{{ java_cacerts_uri }}"
+        dest: "{{ temp_dir.path }}/cacerts"
+      register: download_result
+    - set_fact:
+        cacerts_downloaded: true
+      when: download_result is defined
+  when: found_cacerts.matched > 0 and (current_cacerts.stat.checksum != cacerts_checksum | trim) and (cacerts_downloaded is not defined or not cacerts_downloaded)
+
+- name: Update {{ java_virtual_machine.path | basename }} to current cacerts
+  block:
+    - name: Copy cacerts
+      ansible.builtin.copy:
+        src: "{{ temp_dir.path }}/cacerts"
+        dest: "{{ found_cacerts.files[0].path }}"
+    - name: Restore ownership and permissions
+      ansible.builtin.file:
+        path: "{{ found_cacerts.files[0].path }}"
+        owner: "{{ current_cacerts.stat.pw_name }}"
+        group: "{{ current_cacerts.stat.gr_name }}"
+        mode: "{{ current_cacerts.stat.mode | string }}"
+  become: yes
+  when: found_cacerts.matched > 0 and current_cacerts.stat.checksum != cacerts_checksum | trim

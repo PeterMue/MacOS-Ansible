@@ -1,0 +1,35 @@
+---
+
+- name: Ensure cacerts is up to date
+  block:
+    - name: Find all installed java versions
+      find:
+        paths: /Library/Java/JavaVirtualMachines
+        recurse: yes
+        file_type: directory
+        depth: 1
+      register: found_jvms
+
+    - name: Load current cacerts checksum
+      ansible.builtin.uri:
+        url: "{{ java_cacerts_uri }}"
+        method: HEAD
+        return_content: no
+      register: cacerts_response
+
+    - name: Set current cacerts checksum
+      set_fact:
+        cacerts_checksum: "{{ cacerts_response['x_checksum_sha256'] }}"
+
+    - name: Create a temporary directory
+      ansible.builtin.tempfile:
+        state: directory
+        prefix: cacerts_
+      register: temp_dir
+
+    - name: Ensure cacerts is up to date
+      include_tasks: cacerts_each.yaml
+      loop: "{{ found_jvms.files }}"
+      loop_control:
+        loop_var: java_virtual_machine
+  when: java_cacerts_uri | default(false)
