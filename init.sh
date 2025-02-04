@@ -36,5 +36,5 @@ git clone git@github.com:PeterMue/MacOS-Ansible.git ~/.macos-ansible
 pushd ~/.macos-ansible
     # -- spin it up
     ansible-galaxy install -r requirements.yaml
-    ansible-playbook site.yaml
+    ansible-playbook playbook.yaml
 popd
