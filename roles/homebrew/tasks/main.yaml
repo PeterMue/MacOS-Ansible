@@ -1,0 +1,31 @@
+---
+- name: Check if Homebrew is installed
+  command: which brew
+  register: brew_path
+  ignore_errors: yes
+  changed_when: False
+
+- name: Install Homebrew if necessary
+  command: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+  when: brew_path.rc != 0
+
+- name: Ensure Homebrew is up-to-date
+  community.general.homebrew:
+    update_homebrew: true
+    upgrade_all: true
+
+- name: Upgrade all casks
+  community.general.homebrew_cask:
+    upgrade_all: true
+
+- name: Install packages
+  community.general.homebrew:
+    name: "{{ item }}"
+    state: present
+  loop: "{{ homebrew_packages + default_homebrew_packages }}"
+
+- name: Install casks
+  community.general.homebrew_cask:
+    name: "{{ item }}"
+    state: present
+  loop: "{{ homebrew_casks + default_homebrew_casks }}"

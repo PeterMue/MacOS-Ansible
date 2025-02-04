@@ -1,0 +1,4 @@
+default_homebrew_packages:
+  - stow
+  - ripgrep-all
+default_homebrew_casks: []

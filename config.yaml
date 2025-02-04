@@ -1,0 +1,16 @@
+---
+homebrew_packages:
+  #  - logi-options+
+  - tree
+  - htop
+  - jq
+  - yq
+  - neovim
+
+homebrew_casks:
+  - microsoft-teams
+  - postman
+  - autodesk-fusion
+  - microsoft-office
+  - visual-studio-code
+

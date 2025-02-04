@@ -1,0 +1,19 @@
+---
+- name: Peter MacOS Setup
+  hosts: localhost
+  gather_facts: yes
+  vars_files: [ config.yaml ]
+  vars_prompt:
+    - name: ansible_become_pass
+      prompt: Enter the become password (used for casks that require privilege escalation)
+      private: yes
+  pre_tasks:
+    - name: Assert suported MacOS
+      ansible.builtin.assert:
+        that:
+          - ansible_facts['distribution'] == 'MacOSX'
+          - ansible_facts['distribution_version'] is version('15.0.0', '>=')
+        msg: Unsupported Operating System
+  roles:
+    - name: homebrew
+      tags: [homebrew]
