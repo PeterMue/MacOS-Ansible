@@ -14,3 +14,4 @@ homebrew_casks:
   - microsoft-office
   - visual-studio-code
 
+dotfiles_git_repo: 'git@github.com:PeterMue/dotfiles.git'

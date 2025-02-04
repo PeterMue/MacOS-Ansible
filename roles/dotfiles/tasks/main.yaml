@@ -1,0 +1,30 @@
+---
+- name: Ensure stow is installed
+  community.general.homebrew:
+    name: "stow"
+    state: present
+    update_homebrew: true
+
+- name: Ensure dotfiles repo is properly cloned
+  ansible.builtin.git:
+    repo: "{{ dotfiles_git_repo }}"
+    dest: "{{ dotfiles_dest }}"
+    #    version: "{{ dotfiles_version }}"
+    clone: yes
+    update: yes
+    recursive: yes
+    track_submodules: yes
+
+
+- name: Stow em up
+  ansible.builtin.shell: 
+    cmd: |
+      set -eou pipefail
+      stow . --dotfiles --target {{ ansible_env.HOME }} --dir packages --no-folding --verbose
+    chdir: "{{ dotfiles_dest }}"
+  register: result
+  changed_when: 'result.stderr is search("LINK:")'
+
+- name: Print stowed packages
+  ansible.builtin.debug:
+    msg: "{{ result.stderr | regex_findall('LINK.*') }}"

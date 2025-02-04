@@ -17,3 +17,5 @@
   roles:
     - name: homebrew
       tags: [homebrew]
+    - name: dotfiles
+      tags: [dotfiles]
