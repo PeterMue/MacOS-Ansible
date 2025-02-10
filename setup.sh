@@ -31,7 +31,7 @@ echo "Installing ansible..."
 pip3 install ansible && ansible --version
 
 # -- clone repo
-git clone git@github.com:PeterMue/MacOS-Ansible.git ~/.macos-ansible
+git clone https://github.com/PeterMue/MacOS-Ansible.git ~/.macos-ansible
 
 pushd ~/.macos-ansible
     # -- spin it up
