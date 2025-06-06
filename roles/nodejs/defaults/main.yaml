@@ -1,0 +1,2 @@
+nvm_git_repo: https://github.com/nvm-sh/nvm.git 
+nvm_dir: "{{ lookup('env', 'XDG_CONFIG_HOME') | default(ansible_env.HOME + '/.config', true) }}/nvm"

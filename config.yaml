@@ -1,18 +1,33 @@
 ---
 homebrew_packages:
-  #  - logi-options+
   - tree
   - htop
   - jq
   - yq
   - neovim
+  - gh
+  - corkscrew
+  - asciinema
+  - agg
+  - kubectl
+  - helm
+  - k9s
+  - minikube
+  - mvnvm
+  - k6
+  - gsed
+  - tldr
+  - p7zip
 
 homebrew_casks:
   - microsoft-teams
+  #  - logi-options+ # NOTE: Seems to be broken ¯\_(ツ)_/¯
+  - iterm2
   - postman
   - autodesk-fusion
   - microsoft-office
   - visual-studio-code
+  - intellij-idea
 
 dotfiles_git_repo: 'git@github.com:PeterMue/dotfiles.git'
 
@@ -22,3 +37,42 @@ java_versions:
   - zulu@8
 
 # java_cacerts_uri: https://df4ebe32-f23f-4b0a-9e6a-ca68e87f9d63.mock.pstmn.io/cacerts
+
+nodejs_versions:
+  - "22"
+
+osx_defaults:
+  - domain: NSGlobalDomain
+    key: InitialKeyRepeat
+    value: 10.0
+    type: float
+    state: present
+  - domain: NSGlobalDomain
+    key: KeyRepeat
+    value: 1.0
+    type: float
+    state: present
+  # Required for vim
+  - domain: NSGlobalDomain
+    key: ApplePressAndHoldEnabled
+    value: false
+    type: bool
+    state: present
+  # Required for vim to work in vscode
+  - domain: com.microsoft.VSCode
+    key: ApplePressAndHoldEnabled
+    value: false
+    type: bool
+    state: present
+  # Point iTerm config to our managed one
+  - domain: com.googlecode.iterm2
+    key: PrefsCustomFolder
+    value: "~/.config/iterm2"
+    type: string
+    state: present
+  # screenshot
+  - domain: com.apple.screencapture
+    key: target
+    value: preview
+    type: string
+    state: present

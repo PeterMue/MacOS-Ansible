@@ -1,0 +1,9 @@
+---
+- name: Ensure 'macOs defaults' are properly configured
+  community.general.osx_defaults:
+    domain: "{{ item.domain }}"
+    key: "{{ item.key }}"
+    value: "{{ item.value }}"
+    type: "{{ item.type | default('string') }}"
+    state: "{{ item.state | default('present') }}"
+  with_items: "{{ osx_defaults }}"

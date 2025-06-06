@@ -1,0 +1,13 @@
+---
+- name: Configure corepack
+  ansible.builtin.shell: 
+    cmd: |
+      set -eou pipefail
+      \. "{{ nvm_dir }}/nvm.sh"
+      nvm install {{ version }}
+  loop: "{{ nodejs_versions }}"
+  loop_control:
+    loop_var: version
+  ignore_errors: yes
+  register: nvm_install
+  changed_when: "'Downloading and installing node' in nvm_install.stdout and 'Now using node' in nvm_install.stdout"

@@ -1,0 +1,51 @@
+---
+- name: Install nvm
+  ansible.builtin.shell:
+    cmd: |
+      export NVM_DIR="{{ nvm_dir }}" && (
+      git clone {{ nvm_git_repo }} "$NVM_DIR"
+        cd "$NVM_DIR"
+        git checkout `git describe --abbrev=0 --tags --match "v[0-9]*" $(git rev-list --tags --max-count=1)`
+      ) && \. "$NVM_DIR/nvm.sh"
+  args:
+    creates: "{{ nvm_dir }}/nvm.sh"
+
+- name: Ensure nvm is loaded by zsh
+  ansible.builtin.copy:
+    dest: "{{ lookup('env', 'XDG_CONFIG_HOME') | default(ansible_env.HOME + '/.config', true) }}/zsh/nvm.zsh"
+    content: |
+      export NVM_DIR="{{ nvm_dir }}"
+      [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" # This loads nvm
+      [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+    mode: '0644'
+
+- name: Update nvm
+  ansible.builtin.shell:
+    cmd: |
+      export NVM_DIR="{{ nvm_dir }}" && (
+        cd "$NVM_DIR"
+        latest_tag=$(git describe --abbrev=0 --tags --match "v[0-9]*" $(git rev-list --tags --max-count=1))
+        current_tag=$(git describe --tags --exact-match 2>/dev/null || echo "none")
+
+        if [ "$latest_tag" != "$current_tag" ]; then
+          echo "Update to latest tag $latest_tag"
+          git fetch --tags origin
+          git checkout "$latest_tag"
+          . "$NVM_DIR/nvm.sh"
+        fi
+      )
+  register: nvm_update
+  changed_when: "'Update to latest tag' in nvm_update.stdout"
+
+- name: Install nodejs versions
+  ansible.builtin.shell:
+    cmd: |
+      set -eou pipefail
+      \. "{{ nvm_dir }}/nvm.sh"
+      nvm install {{ version }}
+  loop: "{{ nodejs_versions }}"
+  loop_control:
+    loop_var: version
+  ignore_errors: yes
+  register: nvm_install
+  changed_when: "'Downloading and installing node' in nvm_install.stdout and 'Now using node' in nvm_install.stdout"

@@ -9,17 +9,36 @@
   ansible.builtin.git:
     repo: "{{ dotfiles_git_repo }}"
     dest: "{{ dotfiles_dest }}"
-    #    version: "{{ dotfiles_version }}"
+    version: "{{ dotfiles_version }}"
     clone: yes
     update: yes
     recursive: yes
     track_submodules: yes
+    key_file: "{{ dotfiles_git_ssh_key }}"
 
+- name: Backup conflicting files if any
+  block:
+  - name: Find conflicting files
+    ansible.builtin.shell:
+      cmd: |
+        set -eu
+        eval "$(/opt/homebrew/bin/brew shellenv)"
+        stow . --dotfiles --target {{ ansible_env.HOME }} --dir packages --no-folding --verbose --simulate 2>&1 | grep -E 'cannot stow.*over existing target' | sed 's/^.*over existing target \(.*\) since neither.*/\1/g'
+      chdir: "{{ dotfiles_dest }}"
+    register: conflicting_files
+    changed_when: conflicting_files.stdout_lines | length > 0
+
+  - name: Rename files
+    ansible.builtin.command:
+      cmd: mv "{{ item }}" "{{ item }}.bakup-stow-{{ ansible_date_time.iso8601_basic_short }}"
+      chdir: "{{ ansible_env.HOME }}"
+    with_items: "{{ conflicting_files.stdout_lines }}"
 
 - name: Stow em up
   ansible.builtin.shell: 
     cmd: |
-      set -eou pipefail
+      set -euo pipefail
+      eval "$(/opt/homebrew/bin/brew shellenv)"
       stow . --dotfiles --target {{ ansible_env.HOME }} --dir packages --no-folding --verbose
     chdir: "{{ dotfiles_dest }}"
   register: result

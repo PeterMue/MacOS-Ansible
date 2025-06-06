@@ -21,5 +21,14 @@
       tags: [dotfiles]
     - name: shell
       tags: [shell]
+    - name: defaults
+      tags: [defaults]
     - name: java
       tags: [java]
+    - name: nodejs
+      tags: [nodejs]
+
+# environment:
+#   http_proxy:
+#   https_proxy:
+#   no_proxy:
